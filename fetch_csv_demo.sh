@@ -1,0 +1,1 @@
+mysql -u USERNAME -pPASSWORD --database=DATABASE_NAME --host=HOSTNAME --port=DATABASE_PORT --skip-column-names < fetch_view_record.sql > view_record_fetch.csv
