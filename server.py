@@ -40,7 +40,7 @@ def book_id_to_internal_id(book_id):
 
 # Functions for recommending items according to user id
 
-def recommend(user_id, user_item_matrix, user_factors, item_factors, amounts=10):
+def recommend(user_id, user_item_matrix, user_factors, item_factors, amounts=150):
     
     # Get all the predicted matrix entries by computing the dot product of the current user factors and all the item factors (transposed)
     predicted_ratings = user_factors[user_id,:].dot(item_factors.T).toarray()
