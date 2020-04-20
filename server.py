@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import scipy.sparse as sparse
 from sklearn.preprocessing import MinMaxScaler
-from flask import Flask,jsonify,request
+from flask import Flask,jsonify,request,abort
 
 
 '''''''''''''''''
@@ -26,8 +26,15 @@ user_index_values = list(user_cat_index.values())
 item_index_keys = list(item_cat_index.keys())
 book_index_values = list(item_cat_index.values())
 
+# if user id not in the list, return empty string
 def user_id_to_internal_id(user_id):
-    return user_index_keys[user_index_values.index(user_id)]
+    iid = ""
+    try:
+        value = user_index_values.index(user_id)
+        iid = user_index_keys[value]
+    except ValueError:
+        iid = ""
+    return iid
 
 def book_id_to_internal_id(book_id):
     return item_index_keys[book_index_values.index(book_id)]
@@ -40,7 +47,7 @@ def book_id_to_internal_id(book_id):
 
 # Functions for recommending items according to user id
 
-def recommend(user_id, user_item_matrix, user_factors, item_factors, amounts=150):
+def recommend(user_id, user_item_matrix, user_factors, item_factors, amounts=300):
     
     # Get all the predicted matrix entries by computing the dot product of the current user factors and all the item factors (transposed)
     predicted_ratings = user_factors[user_id,:].dot(item_factors.T).toarray()
@@ -85,9 +92,15 @@ app = Flask(__name__)
 @app.route('/recommend/user/<int:num>', methods=['GET'])
 def http_recommend(num):
     # call recommend function with user id and return the recommendation list as json
+    uid = user_id_to_internal_id(num)
+
+    #if user id is empty string (if it's a new user), abort the request with 404 status code
+    if uid == "":
+        abort(404)
+    
     return jsonify(
         recommend(
-            user_id_to_internal_id(num), 
+            uid, 
             user_item_matrix, 
             user_factors, item_factors
         )
